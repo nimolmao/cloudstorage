@@ -12,7 +12,7 @@
         <div class="container">
             <div id="logoutDiv">
                 <form action="#" th:action="@{/logout}" method="POST">
-                    <button type="submit" class="btn btn-secondary float-right">Logout</button>
+                    <button id="logout-btn" type="submit" class="btn btn-secondary float-right">Logout</button>
                 </form>
             </div>
             <div id="contentDiv" style="clear: right;">
@@ -62,7 +62,7 @@
                         </div>
                     </div>
                     <div class="tab-pane fade" id="nav-notes" role="tabpanel" aria-labelledby="nav-notes-tab">
-                        <button style="margin: 0.25em;" type="button" class="btn btn-info float-right" onclick="showNoteModal()">
+                        <button id="add-note-btn" style="margin: 0.25em;" type="button" class="btn btn-info float-right" onclick="showNoteModal()">
                             + Add a New Note
                         </button>
 
@@ -215,14 +215,13 @@
             }
 
             $('a[data-toggle="tab"]').on('shown.bs.tab', function(e) {
-                console.log("tab shown.." + e);
+                localStorage.setItem('active', $(e.target).attr('href'));
             });
 
             // read hash from page load and change tab
-            var hash = document.location.hash;
-            var prefix = "tab_";
-            if (hash) {
-                $('.nav-tabs a [href="'+has.replace(prefix,"")+'"]').tab('show');
+            var active = localStorage.getItem('active');
+            if (active) {
+                $('.nav-tabs a [href="'+ active +'"]').tab('show');
             }
 
         </script>

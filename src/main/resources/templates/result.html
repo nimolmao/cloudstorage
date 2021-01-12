@@ -10,18 +10,29 @@
     </head>
     <body class="p-3 mb-2 bg-light text-black">
         <div class="container justify-content-center w-50 p-3" style="margin-top: 5em;">
-            <div class="alert alert-success fill-parent">
+            <div th:if="${saveSuccess}" class="alert alert-success fill-parent">
                 <h1 class="display-5">Success</h1>
-                <span th:text="${successMessage}">Your changes were successfully saved. Click <a href="/home">here</a> to continue.</span>
+                <span>Your changes were successfully saved. Click <a th:href="@{'/home'}">here</a> to continue.</span>
             </div>
-            <div class="alert alert-danger fill-parent">
-                <h1 class="display-5">Error</h1>
-                <span>Your changes were not saved. Click <a>here</a> to continue.</span>
+            <div th:if="${updateSuccess}" class="alert alert-success fill-parent">
+                <h1 class="display-5">Success</h1>
+                <span>Your changes were successfully updated. Click <a th:href="@{'/home'}">here</a> to continue.</span>
             </div>
-            <div class="alert alert-danger fill-parent">
+            <div th:if="${deleteSuccess}" class="alert alert-success fill-parent">
+                <h1 class="display-5">Success</h1>
+                <span>Successfully deleted. Click <a th:href="@{'/home'}">here</a> to continue.</span>
+            </div>
+            <div th:if="${saveError}" class="alert alert-danger fill-parent">
                 <h1 class="display-5">Error</h1>
-                <span>Example Error Message</span>
-                <span>Click <a>here</a> to continue.</span>
+                <span>Your changes were not saved. Click <a th:href="@{'/home'}">here</a> to continue.</span>
+            </div>
+            <div th:if="${updateError}" class="alert alert-danger fill-parent">
+                <h1 class="display-5">Error</h1>
+                <span>Your changes were not updated. Click <a th:href="@{'/home'}">here</a> to continue.</span>
+            </div>
+            <div th:if="${deleteError}" class="alert alert-danger fill-parent">
+                <h1 class="display-5">Error</h1>
+                <span>Not successfully deleted. Click <a th:href="@{'/home'}">here</a> to continue.</span>
             </div>
         </div>
     </body>

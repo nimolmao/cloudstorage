@@ -7,6 +7,7 @@ import com.udacity.jwdnd.course1.cloudstorage.service.UserService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.security.Principal;
 
@@ -23,7 +24,7 @@ public class NoteController {
     }
 
     @PostMapping("/save")
-    public String addNote(Principal principal, @ModelAttribute Note note, Model model) {
+    public String addNote(Principal principal, @ModelAttribute Note note, RedirectAttributes redirectAttributes, Model model) {
         User user = userService.getUser(principal.getName());
 
         Note existingNote = noteService.getNote(note.getNoteId());
@@ -35,9 +36,9 @@ public class NoteController {
             boolean updated = noteService.updateNote(existingNote);
 
             if (updated) {
-                model.addAttribute("updatedNoteSuccess", true);
+                redirectAttributes.addFlashAttribute("updateError", true);
             } else {
-                model.addAttribute("updatedNoteError", "There was an error updating the note. Please try again.");
+                redirectAttributes.addFlashAttribute("updateSuccess", true);
             }
         } else {
             if (user != null) {
@@ -45,28 +46,28 @@ public class NoteController {
                 int rowsAdded = noteService.insertNote(note);
 
                 if (rowsAdded < 0) {
-                    model.addAttribute("addedNoteError", "There was an error adding a note. Please try again.");
+                    redirectAttributes.addFlashAttribute("saveError", true);
                 } else {
-                    model.addAttribute("addedNoteSuccess", true);
+                    redirectAttributes.addFlashAttribute("saveSuccess", true);
                 }
             }
 
         }
 
-        return "redirect:/note/notes";
+        return "redirect:/result";
     }
 
     @GetMapping("/delete/{id}")
-    public String deleteNote(@PathVariable("id") Integer id , Model model) {
+    public String deleteNote(@PathVariable("id") Integer id,RedirectAttributes redirectAttributes , Model model) {
         boolean deleted = noteService.deleteNote(id);
 
         if (deleted) {
-            model.addAttribute("deletedNoteSuccess", true);
+            redirectAttributes.addFlashAttribute("deleteSuccess", true);
         } else {
-            model.addAttribute("deletedNoteError", "There was an error deleting the note. Please try again.");
+            redirectAttributes.addFlashAttribute("deleteError", true);
         }
 
-        return "redirect:/note/notes";
+        return "redirect:/result";
     }
 
     @GetMapping("/notes")

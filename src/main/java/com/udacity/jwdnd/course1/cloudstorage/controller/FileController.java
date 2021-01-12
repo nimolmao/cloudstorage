@@ -11,10 +11,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.security.Principal;
 
 @Controller
@@ -43,11 +42,11 @@ public class FileController {
     }
 
     @PostMapping()
-    public String uploadFile(Principal principal, @RequestParam("fileUpload") MultipartFile fileUpload, Model model) throws IOException {
+    public String uploadFile(Principal principal, @RequestParam("fileUpload") MultipartFile fileUpload, RedirectAttributes redirectAttributes, Model model) throws IOException {
         String existingFile = fileService.getFilename(fileUpload.getOriginalFilename());
 
         if (existingFile != null) {
-            model.addAttribute("fileExisted", existingFile + " is already uploaded.");
+            redirectAttributes.addFlashAttribute("fileExisted", existingFile + " is already uploaded.");
         } else {
             if (!fileUpload.getOriginalFilename().equals("")) {
                 User user = userService.getUser(principal.getName());
@@ -56,18 +55,16 @@ public class FileController {
                 int rowsAdded = fileService.uploadFile(file);
 
                 if (rowsAdded < 0) {
-                    model.addAttribute("uploadingError", "There was an error uploading the file. Please try again.");
+                    redirectAttributes.addFlashAttribute("saveError", true);
                 } else {
-                    model.addAttribute("uploadingSuccess", true);
+                    redirectAttributes.addFlashAttribute("saveSuccess", true);
                 }
+                return "redirect:/result";
             }
         }
 
-        model.addAttribute("filenames", fileService.getFilenames());
+        return "redirect:/home";
 
-
-        //return "redirect:/file/files";
-        return "home";
     }
 
     @GetMapping("/files")
@@ -77,15 +74,15 @@ public class FileController {
     }
 
     @GetMapping("/delete/{filename}")
-    public String removeFile(@PathVariable("filename") String filename, Model model) {
+    public String removeFile(@PathVariable("filename") String filename, RedirectAttributes redirectAttributes, Model model) {
         boolean deleted = fileService.deleteFile(filename);
 
         if (deleted) {
-            model.addAttribute("deletenoteSuccess", true);
+            redirectAttributes.addFlashAttribute("deleteSuccess", true);
         } else {
-            model.addAttribute("deletenoteError", "There was an error deleting the note. Please try again.");
+            redirectAttributes.addFlashAttribute("deleteError", true);
         }
 
-        return "redirect:/file/files";
+        return "redirect:/result";
     }
 }

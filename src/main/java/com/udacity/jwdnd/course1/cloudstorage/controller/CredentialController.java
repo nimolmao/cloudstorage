@@ -8,6 +8,7 @@ import com.udacity.jwdnd.course1.cloudstorage.service.UserService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.security.Principal;
 import java.security.SecureRandom;
@@ -28,14 +29,12 @@ public class CredentialController {
     }
 
     @PostMapping("/save")
-    public String saveCredential(Principal principal, @ModelAttribute Credential credential, Model model) {
-        //String key = "test1234quad5678";
+    public String saveCredential(Principal principal, @ModelAttribute Credential credential, RedirectAttributes redirectAttributes, Model model) {
         User user = userService.getUser(principal.getName());
 
         Credential existingCredential = credentialService.getCredential(credential.getCredentialId());
 
         if (existingCredential != null) {
-            System.out.println("existed credential: " + existingCredential);
             existingCredential.setUrl(credential.getUrl());
             existingCredential.setUsername(credential.getUsername());
             existingCredential.setPassword(credential.getPassword());
@@ -43,12 +42,11 @@ public class CredentialController {
             boolean updated = credentialService.updateCredential(existingCredential);
 
             if (updated) {
-                model.addAttribute("updatedCredentialSuccess", true);
+                redirectAttributes.addFlashAttribute("updateSuccess", true);
             } else {
-                model.addAttribute("updatedCredentialError", "There was an error updating the credential. Please try again.");
+                redirectAttributes.addFlashAttribute("updateError", true);
             }
         } else {
-            System.out.println("user: " + user);
             if (user != null) {
                 SecureRandom random = new SecureRandom();
                 byte[] key = new byte[16];
@@ -61,9 +59,9 @@ public class CredentialController {
                 int rowsAdded = credentialService.insertCredential(credential);
 
                 if (rowsAdded < 0) {
-                    model.addAttribute("errorMessage", "There was an error adding a credential. Please try again.");
+                    redirectAttributes.addFlashAttribute("saveError", true);
                 } else {
-                    model.addAttribute("successMessage", "Credential saved. Click <a href=\"/#nav-credentials\">here</a> to continue.");
+                    redirectAttributes.addFlashAttribute("saveSuccess", true);
                 }
             }
         }
@@ -72,16 +70,16 @@ public class CredentialController {
     }
 
     @GetMapping("/delete/{id}")
-    public String deleteCredential(@PathVariable("id") Integer id, Model model) {
+    public String deleteCredential(@PathVariable("id") Integer id, RedirectAttributes redirectAttributes, Model model) {
         boolean deleted = credentialService.deleteCredential(id);
 
         if (deleted) {
-            model.addAttribute("deletedCredentialSuccess", true);
+            redirectAttributes.addFlashAttribute("deleteSuccess", true);
         } else {
-            model.addAttribute("deletedCredentialError", "There was an error deleting the credential. Please try again.");
+            redirectAttributes.addFlashAttribute("deleteError", true);
         }
 
-        return "redirect:/credential/credentials";
+        return "redirect:/result";
     }
 
     @GetMapping("/credentials")
